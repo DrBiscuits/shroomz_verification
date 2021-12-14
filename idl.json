@@ -1,0 +1,31 @@
+{
+  "version": "0.0.0",
+  "name": "shroomz",
+  "instructions": [],
+  "accounts": [
+    {
+      "name": "UserAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "userKey",
+            "type": "publicKey"
+          },
+          {
+            "name": "stakedShroomz",
+            "type": {
+              "vec": "publicKey"
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }],
+  "metadata": {
+    "address": "GGYjKF1LBpqL37qcSetisYj8yQJf4kdQgoGPW7Po6P56"
+  }
+}
