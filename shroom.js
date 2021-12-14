@@ -16,23 +16,27 @@ const wallet = new metaplex.NodeWallet(key);
 const provider = new anchor.Provider(connection, wallet, opts.preflightCommitment);
 const program = new anchor.Program(idl, programId, provider);
 
-var args = process.argv.slice(2);
+// var args = process.argv.slice(2);
 
-async function getUserAccountPDA() {
-    let userKey = new anchor.web3.PublicKey(args[0]);
-    let [key, bump] = await web3.PublicKey.findProgramAddress(
-      [userKey.toBuffer(), Buffer.from("1")],
-      programId
-    );
-    return [key, bump];
-  }
+// async function getUserAccountPDA() {
+//     let userKey = new anchor.web3.PublicKey(args[0]);
+//     let [key, bump] = await web3.PublicKey.findProgramAddress(
+//       [userKey.toBuffer(), Buffer.from("1")],
+//       programId
+//     );
+//     return [key, bump];
+//   }
 
 async function printUserAccount() {
-	let pda = await getUserAccountPDA();
+	// let pda = await getUserAccountPDA();
   //let account = await connection.getParsedAccountInfo(pda[0], "processed");
-	let account = await program.account.userAccount.fetch(pda[0]);
+	let accounts = await program.account.userAccount.all();
+  accounts = accounts.filter(function(a){return a.account.stakedShroomz.length  > 0});
+  accounts.forEach(account => {
+      console.log(account.account.userKey.toString());
+    })
 	//printDetails("User Account", pda[0], account);jsonParsed
-	console.log("shroom addresses: " + account.stakedShroomz);//JSON.stringify(account.value));
+	// console.log("user accounts addresses: " + accounts.map());//JSON.stringify(account.value));
 }
 
 
