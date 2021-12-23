@@ -22,7 +22,7 @@ const wallet = new metaplex.NodeWallet(key);
 const provider = new anchor.Provider(connection, wallet, opts.preflightCommitment);
 const program = new anchor.Program(idl, programId, provider);
 
-var args = process.argv.slice(2);
+var symbol = process.argv.slice(2)[0];
 
 async function getMetadataPDA(id) {
     let [key, bump] = await anchor.web3.PublicKey.findProgramAddress(
@@ -33,23 +33,27 @@ async function getMetadataPDA(id) {
     );
     return key;
 } 
-async function getMetadata(tokenAddresses) {
-    const metadataAddresses = await Promise.all(tokenAddresses.map(key => getMetadataPDA(key)));
+async function getMetadata(accounts) {
+    const metadataAddresses = await Promise.all(accounts.map(a => getMetadataPDA(a.account.nftKey)));
     const metadataAccountInfos = await provider.connection.getMultipleAccountsInfo(metadataAddresses);
 
-    return metadataAccountInfos.map(m => 
-      m?.data !== undefined ? MetadataData.deserialize(metadataAccountInfo?.data) : undefined);
+    return metadataAccountInfos.map((m, index) => 
+      [accounts[index], 
+      m?.data !== undefined ? MetadataData.deserialize(m?.data) : undefined]);
 }
 
-async function printAllStakedPairs() {
+async function printStakedUsers() {
   let accounts = await program.account.shroomPairAccount.all();
-  // accounts.forEach(a => console.log(a.account.userKey));
-  let metadatas = await getMetadata(accounts.map(a => a.account.nftKey));
-  //accounts.filter(a => a.account.timestamp > 0).forEach(a => console.log(a));
+  accounts = accounts.filter(a => a.account.timestamp > 0)
+
+  let metadatas = await getMetadata(accounts);
+  metadatas = metadatas.filter(a => a[1].data.symbol === symbol.toString())
+  console.log("Users staking", symbol, ":", metadatas.length);
+  metadatas.forEach(m => console.log(m[0].account.userKey.toString()));
 }
 
 
-printAllStakedPairs();
+printStakedUsers();
 
 
 
