@@ -4,7 +4,7 @@
   "instructions": [],
   "accounts": [
     {
-      "name": "UserAccount",
+      "name": "ShroomPairAccount",
       "type": {
         "kind": "struct",
         "fields": [
@@ -13,10 +13,24 @@
             "type": "publicKey"
           },
           {
-            "name": "stakedShroomz",
-            "type": {
-              "vec": "publicKey"
-            }
+            "name": "shroomKey",
+            "type": "publicKey"
+          },
+          {
+            "name": "nftKey",
+            "type": "publicKey"
+          },
+          {
+            "name": "timestamp",
+            "type": "u32"
+          },
+          {
+            "name": "lastRewardTime",
+            "type": "u32"
+          },
+          {
+            "name": "options",
+            "type": "u32"
           },
           {
             "name": "bump",
@@ -24,7 +38,48 @@
           }
         ]
       }
-    }],
+    },
+    {
+      "name": "PairSettingsAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "creatorKey",
+            "type": "publicKey"
+          },
+          {
+            "name": "rewardMintKey",
+            "type": "publicKey"
+          },
+          {
+            "name": "psyEmissionsPerSecond",
+            "type": "u64"
+          },
+          {
+            "name": "otherEmissionsPerSecond",
+            "type": "u64"
+          },
+          {
+            "name": "otherEmissionsFeePercent",
+            "type": "u16"
+          },
+          {
+            "name": "options",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ],
   "metadata": {
     "address": "GGYjKF1LBpqL37qcSetisYj8yQJf4kdQgoGPW7Po6P56"
   }

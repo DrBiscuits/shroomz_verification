@@ -3,10 +3,16 @@
 const web3 = require("@solana/web3.js");
 const connection = new web3.Connection("https://api.mainnet-beta.solana.com");
 const anchor = require('@project-serum/anchor')
-const metaplex = require("@metaplex/js");
+
 const idl = JSON.parse(require('fs').readFileSync('idl.json', 'utf8'));
 
+const metaplex = require("@metaplex/js");
+const {metadata: { MetadataData }} = metaplex.programs;
+
+
+const METAPLEX_PROGRAM_ID = new anchor.web3.PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
 let programId = new anchor.web3.PublicKey("GGYjKF1LBpqL37qcSetisYj8yQJf4kdQgoGPW7Po6P56");
+
 
 const key = anchor.web3.Keypair.generate();
 const opts = {
@@ -16,28 +22,35 @@ const wallet = new metaplex.NodeWallet(key);
 const provider = new anchor.Provider(connection, wallet, opts.preflightCommitment);
 const program = new anchor.Program(idl, programId, provider);
 
-// var args = process.argv.slice(2);
+var args = process.argv.slice(2);
 
-// async function getUserAccountPDA() {
-//     let userKey = new anchor.web3.PublicKey(args[0]);
-//     let [key, bump] = await web3.PublicKey.findProgramAddress(
-//       [userKey.toBuffer(), Buffer.from("1")],
-//       programId
-//     );
-//     return [key, bump];
-//   }
+async function getMetadataPDA(id) {
+    let [key, bump] = await anchor.web3.PublicKey.findProgramAddress(
+      [Buffer.from("metadata"),
+      METAPLEX_PROGRAM_ID.toBuffer(),
+      id.toBuffer()], 
+      METAPLEX_PROGRAM_ID
+    );
+    return key;
+} 
+async function getMetadata(tokenAddresses) {
+    const metadataAddresses = await Promise.all(tokenAddresses.map(key => getMetadataPDA(key)));
+    const metadataAccountInfos = await provider.connection.getMultipleAccountsInfo(metadataAddresses);
 
-async function printUserAccount() {
-	// let pda = await getUserAccountPDA();
-  //let account = await connection.getParsedAccountInfo(pda[0], "processed");
-	let accounts = await program.account.userAccount.all();
-  accounts = accounts.filter(function(a){return a.account.stakedShroomz.length  > 0});
-  accounts.forEach(account => {
-      console.log(account.account.userKey.toString());
-    })
-	//printDetails("User Account", pda[0], account);jsonParsed
-	// console.log("user accounts addresses: " + accounts.map());//JSON.stringify(account.value));
+    return metadataAccountInfos.map(m => 
+      m?.data !== undefined ? MetadataData.deserialize(metadataAccountInfo?.data) : undefined);
+}
+
+async function printAllStakedPairs() {
+  let accounts = await program.account.shroomPairAccount.all();
+  // accounts.forEach(a => console.log(a.account.userKey));
+  let metadatas = await getMetadata(accounts.map(a => a.account.nftKey));
+  //accounts.filter(a => a.account.timestamp > 0).forEach(a => console.log(a));
 }
 
 
-printUserAccount();
+printAllStakedPairs();
+
+
+
+
